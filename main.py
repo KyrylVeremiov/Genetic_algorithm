@@ -199,4 +199,3 @@ def F(X):
         return abs(X * np.sin(X) + 0.1 * X).sum()
 
 ga.solve(F,True)
-# print(solve(f,False))
