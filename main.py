@@ -35,7 +35,7 @@ class ga:
     # %%
     def fitness(P):
         X = ga.bytes_to_int(P)
-        return np.array([(P[i], ga.f(X[i])) for i in range(X.shape[0])])
+        return np.array([(P[i], ga.f(X[i])) for i in range(X.shape[0])],dtype=object)
 
     #%%
 
@@ -44,7 +44,7 @@ class ga:
         # P=fit_population[:,0]
         newP=np.array([list(P[i]) for i in range(P.shape[0])])
         X = ga.bytes_to_int(newP)
-        return np.array([(X[i], ga.f(X[i])) for i in range(X.shape[0])])
+        return np.array([(X[i], ga.f(X[i])) for i in range(X.shape[0])],dtype=object)
 
     def get_population_condition(X):
         return (abs(X[:, 1]).sum()) / X.shape[0]
@@ -148,6 +148,7 @@ class ga:
 
         #%%
         if show_calculations:
+            print('Initial: ')
             ga.show_results(fit_population)
             # tmp_population=get_population()
             # print('X: ')
@@ -167,7 +168,7 @@ class ga:
 
             if show_calculations:
                 # new_population=get_population(fit_population[:,0])
-
+                print('Iteration: ',i)
                 ga.show_results(fit_population)
                 # print()
                 # print('--------------------------------------')
@@ -184,7 +185,7 @@ class ga:
 
         X=min(final_population, key=lambda item: item[1])
         if show_calculations:
-
+            print('Final: ')
             ga.show_results(fit_population)
             #%%
             # print('X: ')
@@ -199,3 +200,12 @@ def F(X):
         return abs(X * np.sin(X) + 0.1 * X).sum()
 
 ga.solve(F,True)
+
+import matplotlib.pyplot as plt
+
+def f1(x):
+    return x * np.sin(x) + 0.1 * x
+
+X=np.arange(-10, 10, 0.1)
+plt.plot(X,f1(X))
+plt.show()
