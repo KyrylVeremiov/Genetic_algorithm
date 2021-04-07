@@ -9,11 +9,13 @@ class ga:
     tournament_size = 2
     t = 10
 
-    a = -10
-    b = 10
+    a = None
+    b = None
     f = None
 
     n_bits = 4
+
+    best_unit = None
 
     # %%
     def int_to_bytes(P):
@@ -83,7 +85,7 @@ class ga:
 
         # for two children
         # return [np.array(c1), np.array(c2)]
-        return  [np.array(c1)]
+        return [np.array(c1)]
 
     def crossover_population(P, count_of_children):
         new_children = []
@@ -109,19 +111,25 @@ class ga:
     def mutate_population(P):
         new_generation = []
         for i in range(P.shape[0]):
-            new_unit=ga.mutate(P[i])
-            decoded_new_unit=ga.get_population(np.array(new_unit))[:,0][0]
+            new_unit = ga.mutate(P[i])
+            decoded_new_unit = ga.get_population(np.array(new_unit))[:, 0][0]
+            # print(decoded_new_unit)
             # taking into account intervals
-            if (decoded_new_unit.any()>=ga.a) and (decoded_new_unit.any() <= ga.b):
+            if np.all(decoded_new_unit >= ga.a) and np.all(decoded_new_unit <= ga.b):
+                # print(True)
                 new_generation += new_unit
         return np.array(new_generation)
+
+
+    def get_best_unit_of_population(fP):
+        return min(fP, key=lambda item: item[1])
 
     # %%
     def show_results(fP):
         tmp_population = ga.get_population(fP[:, 0])
         print()
         print('X: ')
-        print(min(tmp_population, key=lambda item: item[1]))
+        print(ga.get_best_unit_of_population(tmp_population))
         print('Population:')
         print(tmp_population)
         print('Score of population:')
@@ -130,14 +138,20 @@ class ga:
         print()
 
     # %%
-    def solve(F,A,B, show_calculations):
-        ga.f = F
-        ga.a=A
-        ga.b=B
+    def solve(f_, D_, a_, b_, t_=10, size_of_population_=20, tournament_size_=2, show_calculations=False):
+        ga.f = f_
+        ga.D = D_
+        ga.a = a_
+        ga.b = b_
+
+        ga.size_of_population = size_of_population_
+        ga.tournament_size = tournament_size_
+        ga.t = t_
         # %%
         population = ga.make_initial_population(ga.size_of_population, ga.a, ga.b)
         # %%
         fit_population = ga.fitness(population)
+        ga.best_unit = ga.get_best_unit_of_population(ga.get_population(fit_population[:,0]))
         # print(fit_population)
 
         # %%
@@ -160,6 +174,9 @@ class ga:
             new_fit_generaton = ga.fitness(new_generation)
             fit_population = ga.tournament_selection(np.concatenate((new_fit_generaton, fit_population)),
                                                      ga.tournament_size, ga.size_of_population)
+            best_unit_of_this_population = ga.get_best_unit_of_population(ga.get_population(fit_population[:,0]))
+            if best_unit_of_this_population[1] < ga.best_unit[1]:
+                ga.best_unit = best_unit_of_this_population
 
             if show_calculations:
                 # new_population=get_population(fit_population[:,0])
@@ -176,9 +193,10 @@ class ga:
                 # print('--------------------------------------')
                 # print()
 
-        final_population = ga.get_population(fit_population[:, 0])
+        best_unit_of_final_population = ga.get_best_unit_of_population(fit_population)
+        if best_unit_of_final_population[1] < ga.best_unit[1]:
+            ga.best_unit = best_unit_of_final_population
 
-        X = min(final_population, key=lambda item: item[1])
         if show_calculations:
             print('Final: ')
             ga.show_results(fit_population)
@@ -189,16 +207,23 @@ class ga:
             # print(final_population)
             # print('Total score:')
             # print(get_population_condition(final_population))
-        return X
+        return ga.best_unit
 
 
 def F(X):
     return abs(X * np.sin(X) + 0.1 * X).sum()
 
-a=-10
-b=10
-print('Solution: ',ga.solve(F,a,b, True))
+A = -10
+B = 10
 
+print('Solution: ', ga.solve(F, 2, A, B, t_=10, size_of_population_=20,tournament_size_=2, show_calculations=True))
+# F,2,A,B,10,20,2,True
+# ga.best_unit
+
+
+
+# %%
+# %%
 # import matplotlib.pyplot as plt
 #
 # def f1(x):
